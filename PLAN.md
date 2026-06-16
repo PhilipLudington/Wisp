@@ -13,7 +13,7 @@ storage first, then the write path (collector), then the script that feeds it
 that ties config to both ends, and finally deployment, backups, and onboarding a real
 site.
 
-**Current status:** Phase 0 complete (2026-06-16). Phase 1 next.
+**Current status:** Phase 1 complete (2026-06-16). Phase 2 next.
 
 **Stack:** TypeScript, Hono, `better-sqlite3` (synchronous, WAL), Vite + React SPA,
 Recharts or uPlot for charts, Railway (container + persistent volume), Cloudflare R2
@@ -61,7 +61,8 @@ Before Phase 1, these must be true:
 
 ---
 
-## Phase 1: Ingestion Collector (`POST /e`)
+## Phase 1: Ingestion Collector (`POST /e`) ✅
+**Status:** Complete (2026-06-16)
 
 **Goal:** The complete write path — validate, origin-check, bot-filter, derive the
 daily visitor hash with a persisted rotating salt, resolve the session window, and
@@ -80,16 +81,16 @@ insert an event.
 - Event insert into `events`
 
 ### Tasks
-- [ ] Define the ingest payload type and a validator; enforce max body size
-- [ ] Implement `POST /e`: parse, validate, resolve site by `data-site` key (404/204 on unknown)
-- [ ] Origin check: compare request `Origin` against `sites.domains` JSON array
-- [ ] Bot filter module: maintained UA blocklist + heuristics; return early and log drops
-- [ ] Salt service: read current UTC-day salt; on first request of a new day, generate a fresh salt and overwrite the prior row (only current day kept)
-- [ ] Visitor hash: `sha256(ip + user_agent + site + daily_salt)`; raw IP/UA used in-memory only, then discarded
-- [ ] Session resolver: look up visitor's most recent event; reuse `session` if within 30 min, else mint a new one (read-then-write)
-- [ ] Device derivation from UA
-- [ ] Insert the event row; respond 204 with no body
-- [ ] Extract real client IP correctly behind Railway's proxy (trust `X-Forwarded-For` appropriately)
+- [x] Define the ingest payload type and a validator; enforce max body size (completed 2026-06-16)
+- [x] Implement `POST /e`: parse, validate, resolve site by `data-site` key (404 on unknown) (completed 2026-06-16)
+- [x] Origin check: compare request `Origin` against `sites.domains` JSON array (completed 2026-06-16)
+- [x] Bot filter module: maintained UA blocklist + heuristics; return early and log drops (completed 2026-06-16)
+- [x] Salt service: read current UTC-day salt; on first request of a new day, generate a fresh salt and overwrite the prior row (only current day kept) (completed 2026-06-16)
+- [x] Visitor hash: `sha256(ip + user_agent + site + daily_salt)`; raw IP/UA used in-memory only, then discarded (completed 2026-06-16)
+- [x] Session resolver: look up visitor's most recent event; reuse `session` if within 30 min, else mint a new one (read-then-write) (completed 2026-06-16)
+- [x] Device derivation from UA (completed 2026-06-16)
+- [x] Insert the event row; respond 204 with no body (completed 2026-06-16)
+- [x] Extract real client IP correctly behind Railway's proxy (trust `X-Forwarded-For` appropriately) (completed 2026-06-16)
 
 ### Testing Strategy
 - Valid payload inserts exactly one `events` row with correct fields
@@ -103,9 +104,9 @@ insert an event.
 
 ### Phase 1 Readiness Gate
 Before Phase 2, these must be true:
-- [ ] `POST /e` reliably ingests valid events and rejects invalid ones
-- [ ] Salt persistence verified across restart and day-rotation
-- [ ] Session windowing and visitor hashing verified by tests
+- [x] `POST /e` reliably ingests valid events and rejects invalid ones
+- [x] Salt persistence verified across restart and day-rotation
+- [x] Session windowing and visitor hashing verified by tests
 
 ---
 

@@ -10,7 +10,7 @@ if (applied.length > 0) {
   console.log(`Applied migrations: ${applied.join(', ')}`);
 }
 
-const app = createApp();
+const app = createApp(db);
 
 serve({ fetch: app.fetch, port: config.port }, (info) => {
   console.log(`Wisp listening on http://localhost:${info.port} (db: ${config.dbPath})`);
