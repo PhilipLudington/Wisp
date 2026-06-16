@@ -13,7 +13,7 @@ storage first, then the write path (collector), then the script that feeds it
 that ties config to both ends, and finally deployment, backups, and onboarding a real
 site.
 
-**Current status:** Phase 0 not started.
+**Current status:** Phase 0 complete (2026-06-16). Phase 1 next.
 
 **Stack:** TypeScript, Hono, `better-sqlite3` (synchronous, WAL), Vite + React SPA,
 Recharts or uPlot for charts, Railway (container + persistent volume), Cloudflare R2
@@ -21,7 +21,8 @@ Recharts or uPlot for charts, Railway (container + persistent volume), Cloudflar
 
 ---
 
-## Phase 0: Foundation & Storage
+## Phase 0: Foundation & Storage ✅
+**Status:** Complete (2026-06-16)
 
 **Goal:** A running Hono server backed by a migrated SQLite database in WAL mode, with
 the project scaffolding and dev tooling in place.
@@ -36,13 +37,13 @@ the project scaffolding and dev tooling in place.
 - A way to seed/register a site (CLI script or seed migration) for local testing
 
 ### Tasks
-- [ ] Initialize repo: `package.json`, `tsconfig.json`, ESLint/Prettier, `.gitignore`
-- [ ] Add Hono + a dev runner (e.g. `tsx watch`) and a `health` route returning 200
-- [ ] Add `better-sqlite3`; open DB with `PRAGMA journal_mode=WAL` and sane pragmas (`synchronous=NORMAL`, `foreign_keys=ON`, `busy_timeout`)
-- [ ] Write a minimal migration runner (tracks applied versions in a table)
-- [ ] Author migration 001: `sites`, `events`, `salt` tables + `idx_events_site_ts`, `idx_events_visitor` (per DESIGN schema)
-- [ ] Add a `seed-site` script to insert a test site (`key`, `name`, `domains`, `config`)
-- [ ] Centralize config (DB path, port, admin password, salt rotation TZ) via env vars
+- [x] Initialize repo: `package.json`, `tsconfig.json`, ESLint/Prettier, `.gitignore` (completed 2026-06-16)
+- [x] Add Hono + a dev runner (e.g. `tsx watch`) and a `health` route returning 200 (completed 2026-06-16)
+- [x] Add `better-sqlite3`; open DB with `PRAGMA journal_mode=WAL` and sane pragmas (`synchronous=NORMAL`, `foreign_keys=ON`, `busy_timeout`) (completed 2026-06-16)
+- [x] Write a minimal migration runner (tracks applied versions in a table) (completed 2026-06-16)
+- [x] Author migration 001: `sites`, `events`, `salt` tables + `idx_events_site_ts`, `idx_events_visitor` (per DESIGN schema) (completed 2026-06-16)
+- [x] Add a `seed-site` script to insert a test site (`key`, `name`, `domains`, `config`) (completed 2026-06-16)
+- [x] Centralize config (DB path, port, admin password, salt rotation TZ) via env vars (completed 2026-06-16)
 
 ### Testing Strategy
 - Server starts and `GET /health` returns 200
@@ -54,9 +55,9 @@ the project scaffolding and dev tooling in place.
 
 ### Phase 0 Readiness Gate
 Before Phase 1, these must be true:
-- [ ] Server boots and serves `/health`
-- [ ] Fresh DB migrates cleanly and is idempotent
-- [ ] At least one test site exists in `sites`
+- [x] Server boots and serves `/health` (returns 200 `{"status":"ok"}`)
+- [x] Fresh DB migrates cleanly and is idempotent (re-run is a no-op)
+- [x] At least one test site exists in `sites` (`blog` seeded)
 
 ---
 
