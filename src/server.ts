@@ -5,6 +5,7 @@ import type { DB } from './db/connection.js';
 import { handleIngest } from './ingest/route.js';
 import { registerStats } from './stats/routes.js';
 import { handleTracker } from './tracker/serve.js';
+import { registerDashboard } from './web/serve.js';
 
 /** Options for {@link createApp}; tests override the admin password here. */
 export interface AppOptions {
@@ -35,6 +36,10 @@ export function createApp(db: DB, opts: AppOptions = {}): Hono {
   app.use('/api/sites/*', requireAuth(adminPassword));
   app.use('/api/sites', requireAuth(adminPassword));
   registerStats(app, db);
+
+  // The dashboard SPA + its static assets. Registered last so its catch-all
+  // only handles requests the routes above didn't.
+  registerDashboard(app);
 
   return app;
 }

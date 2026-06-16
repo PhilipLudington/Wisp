@@ -13,7 +13,7 @@ storage first, then the write path (collector), then the script that feeds it
 that ties config to both ends, and finally deployment, backups, and onboarding a real
 site.
 
-**Current status:** Phase 3 complete (2026-06-16). Phase 4 next.
+**Current status:** Phase 4 complete (2026-06-16). Phase 5 next.
 
 **Stack:** TypeScript, Hono, `better-sqlite3` (synchronous, WAL), Vite + React SPA,
 Recharts or uPlot for charts, Railway (container + persistent volume), Cloudflare R2
@@ -197,7 +197,8 @@ Before Phase 4, these must be true:
 
 ---
 
-## Phase 4: Dashboard SPA
+## Phase 4: Dashboard SPA ✅
+**Status:** Complete (2026-06-16)
 
 **Goal:** A static Vite + React dashboard, served by the same Hono process, that
 renders the core traffic view per site behind the password gate.
@@ -212,16 +213,16 @@ renders the core traffic view per site behind the password gate.
 - Charting via Recharts or uPlot (uPlot if bundle size matters)
 
 ### Tasks
-- [ ] Scaffold Vite + React app; wire its build output to be served as static assets by Hono
-- [ ] Login screen → auth route; handle authed/unauthed app states
-- [ ] Site switcher (lists `sites`)
-- [ ] Pageviews chart (line/area) + range selector (24h/7d/30d/custom) + range total
-- [ ] Unique-visitors chart as per-day series with explicit "no range total" treatment
-- [ ] Top pages, top referrers/sources, device breakdown panels
-- [ ] Custom-events list panel
-- [ ] Current-visitors indicator (polls the last-5-min endpoint)
-- [ ] Pick and integrate the chart library; keep the bundle lean
-- [ ] Production build wired into the single-process serve path
+- [x] Scaffold Vite + React app; wire its build output to be served as static assets by Hono (completed 2026-06-16)
+- [x] Login screen → auth route; handle authed/unauthed app states (completed 2026-06-16)
+- [x] Site switcher (lists `sites`) (completed 2026-06-16)
+- [x] Pageviews chart (line/area) + range selector (24h/7d/30d/custom) + range total (completed 2026-06-16)
+- [x] Unique-visitors chart as per-day series with explicit "no range total" treatment (completed 2026-06-16)
+- [x] Top pages, top referrers/sources, device breakdown panels (completed 2026-06-16)
+- [x] Custom-events list panel (completed 2026-06-16)
+- [x] Current-visitors indicator (polls the last-5-min endpoint) (completed 2026-06-16)
+- [x] Pick and integrate the chart library; keep the bundle lean — chose hand-rolled SVG charts (zero chart dependency) over Recharts/uPlot; dashboard JS is ~49.5KB gzipped (completed 2026-06-16)
+- [x] Production build wired into the single-process serve path (completed 2026-06-16)
 
 ### Testing Strategy
 - Login flow works; the app is inaccessible without auth
@@ -235,8 +236,8 @@ renders the core traffic view per site behind the password gate.
 
 ### Phase 4 Readiness Gate
 Before Phase 5, these must be true:
-- [ ] Full core dashboard renders correct data end-to-end behind auth
-- [ ] Single-process serving (API + `wisp.js` + SPA) confirmed locally
+- [x] Full core dashboard renders correct data end-to-end behind auth
+- [x] Single-process serving (API + `wisp.js` + SPA) confirmed locally
 
 ---
 
