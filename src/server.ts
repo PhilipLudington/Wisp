@@ -1,15 +1,24 @@
 import { Hono } from 'hono';
+import { registerAuth, requireAuth } from './auth/routes.js';
+import { config } from './config.js';
 import type { DB } from './db/connection.js';
 import { handleIngest } from './ingest/route.js';
+import { registerStats } from './stats/routes.js';
 import { handleTracker } from './tracker/serve.js';
+
+/** Options for {@link createApp}; tests override the admin password here. */
+export interface AppOptions {
+  adminPassword?: string;
+}
 
 /**
  * Build the Hono app. Routes are mounted here; the entry point (`index.ts`)
  * owns process concerns (DB open, migrations, listening). The database handle
  * is injected so tests can supply an isolated DB.
  */
-export function createApp(db: DB): Hono {
+export function createApp(db: DB, opts: AppOptions = {}): Hono {
   const app = new Hono();
+  const adminPassword = opts.adminPassword ?? config.adminPassword;
 
   app.get('/health', (c) => c.json({ status: 'ok' }));
 
@@ -18,6 +27,14 @@ export function createApp(db: DB): Hono {
 
   // The only write path: tracker events.
   app.post('/e', handleIngest(db));
+
+  // Auth (login/logout/me) is open; everything else under /api requires a
+  // valid session cookie. The guard is mounted before the read routes so it
+  // covers them all.
+  registerAuth(app, adminPassword);
+  app.use('/api/sites/*', requireAuth(adminPassword));
+  app.use('/api/sites', requireAuth(adminPassword));
+  registerStats(app, db);
 
   return app;
 }

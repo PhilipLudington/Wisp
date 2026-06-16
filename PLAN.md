@@ -13,7 +13,7 @@ storage first, then the write path (collector), then the script that feeds it
 that ties config to both ends, and finally deployment, backups, and onboarding a real
 site.
 
-**Current status:** Phase 2 complete (2026-06-16). Phase 3 next.
+**Current status:** Phase 3 complete (2026-06-16). Phase 4 next.
 
 **Stack:** TypeScript, Hono, `better-sqlite3` (synchronous, WAL), Vite + React SPA,
 Recharts or uPlot for charts, Railway (container + persistent volume), Cloudflare R2
@@ -155,7 +155,8 @@ Before Phase 3, these must be true:
 
 ---
 
-## Phase 3: Stats Query API & Auth
+## Phase 3: Stats Query API & Auth ✅
+**Status:** Complete (2026-06-16)
 
 **Goal:** Single-password authentication and the read-side API that powers every
 dashboard panel, computed on read with SQL `GROUP BY` queries.
@@ -168,16 +169,16 @@ dashboard panel, computed on read with SQL `GROUP BY` queries.
 - Range selector support (24h / 7d / 30d / custom) on time-series queries
 
 ### Tasks
-- [ ] Implement single-password auth: login route, signed session cookie or token, middleware guarding read routes
-- [ ] `GET` pageviews time series for a site + range, plus a range total (sums across days)
-- [ ] `GET` unique visitors as a per-day series only — explicitly no single range total (salt rotation makes cross-day dedupe meaningless)
-- [ ] `GET` top pages (GROUP BY path)
-- [ ] `GET` top referrers/sources (GROUP BY referrer)
-- [ ] `GET` device breakdown (GROUP BY device)
-- [ ] `GET` custom-events list with counts (GROUP BY name where kind='event')
-- [ ] `GET` current visitors (distinct visitors in last 5 min)
-- [ ] Validate/normalize range params; bound custom ranges
-- [ ] Confirm `idx_events_site_ts` / `idx_events_visitor` serve these queries (EXPLAIN QUERY PLAN)
+- [x] Implement single-password auth: login route, signed session cookie or token, middleware guarding read routes (completed 2026-06-16)
+- [x] `GET` pageviews time series for a site + range, plus a range total (sums across days) (completed 2026-06-16)
+- [x] `GET` unique visitors as a per-day series only — explicitly no single range total (salt rotation makes cross-day dedupe meaningless) (completed 2026-06-16)
+- [x] `GET` top pages (GROUP BY path) (completed 2026-06-16)
+- [x] `GET` top referrers/sources (GROUP BY referrer) (completed 2026-06-16)
+- [x] `GET` device breakdown (GROUP BY device) (completed 2026-06-16)
+- [x] `GET` custom-events list with counts (GROUP BY name where kind='event') (completed 2026-06-16)
+- [x] `GET` current visitors (distinct visitors in last 5 min) (completed 2026-06-16)
+- [x] Validate/normalize range params; bound custom ranges (completed 2026-06-16)
+- [x] Confirm `idx_events_site_ts` / `idx_events_visitor` serve these queries (EXPLAIN QUERY PLAN) (completed 2026-06-16)
 
 ### Testing Strategy
 - Unauthenticated requests to read routes are rejected; correct password grants access
@@ -190,9 +191,9 @@ dashboard panel, computed on read with SQL `GROUP BY` queries.
 
 ### Phase 3 Readiness Gate
 Before Phase 4, these must be true:
-- [ ] Auth protects all read routes
-- [ ] Every dashboard panel has a backing endpoint returning correct data
-- [ ] Time-series and unique-visitor semantics match DESIGN (range total vs. per-day-only)
+- [x] Auth protects all read routes
+- [x] Every dashboard panel has a backing endpoint returning correct data
+- [x] Time-series and unique-visitor semantics match DESIGN (range total vs. per-day-only)
 
 ---
 
