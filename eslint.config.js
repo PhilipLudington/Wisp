@@ -12,4 +12,20 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
+  {
+    // The tracker is hand-written browser JS, not part of the Node/TS build.
+    files: ['tracker/**/*.js'],
+    languageOptions: {
+      globals: {
+        window: 'readonly',
+        document: 'readonly',
+        navigator: 'readonly',
+        location: 'readonly',
+        history: 'readonly',
+        screen: 'readonly',
+        fetch: 'readonly',
+        URL: 'readonly',
+      },
+    },
+  },
 );

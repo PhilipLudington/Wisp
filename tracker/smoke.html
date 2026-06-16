@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wisp tracker — smoke test</title>
+    <!--
+      Manual smoke test for the tracker. It loads /wisp.js from the Wisp server
+      and exercises pageviews, SPA navigation, custom events, and auto-tracking.
+
+      Setup:
+        1. Build + run the server:   npm run build:tracker && npm run dev
+        2. Serve this page over http from an origin the site allows. Example:
+             npm run seed-site -- blog "Blog" "http://localhost:8080"
+             npx serve tracker -l 8080      (or: python3 -m http.server 8080 -d tracker)
+        3. Open http://localhost:8080/smoke.html and watch the server log + DB.
+
+      The Origin header must match a domain in the seeded site, or POST /e
+      returns 403. data-host points the tracker at the collector (port 3000).
+    -->
+    <script
+      defer
+      data-site="blog"
+      data-host="http://localhost:3000"
+      data-auto="outboundLinks,scrollDepth"
+      src="http://localhost:3000/wisp.js"
+    ></script>
+    <style>
+      body {
+        font:
+          16px/1.5 system-ui,
+          sans-serif;
+        max-width: 40rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      button {
+        font: inherit;
+        padding: 0.4rem 0.8rem;
+        margin: 0.25rem 0.25rem 0.25rem 0;
+      }
+      .spacer {
+        height: 200vh;
+      }
+      code {
+        background: #f0f0f0;
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Wisp tracker smoke test</h1>
+    <p>
+      A pageview fired on load. Use the buttons below; check the server log and the
+      <code>events</code> table.
+    </p>
+
+    <button id="event">Fire custom event (signup)</button>
+    <button id="push">SPA navigate (pushState to /step-2)</button>
+    <button id="outbound">Outbound link</button>
+
+    <p>
+      <a href="https://example.com" id="outbound-link">An outbound link to example.com</a>
+      — clicking it fires an <code>outbound</code> event (auto-track).
+    </p>
+
+    <p>Scroll to the bottom to fire a <code>scroll</code> event (auto-track).</p>
+    <div class="spacer"></div>
+    <p>You reached the bottom — a scroll-depth event should have fired.</p>
+
+    <script>
+      document.getElementById('event').addEventListener('click', function () {
+        window.wisp('event', 'signup', { plan: 'pro' });
+      });
+      document.getElementById('push').addEventListener('click', function () {
+        history.pushState({}, '', '/step-2');
+      });
+      document.getElementById('outbound').addEventListener('click', function () {
+        document.getElementById('outbound-link').click();
+      });
+    </script>
+  </body>
+</html>

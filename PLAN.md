@@ -13,7 +13,7 @@ storage first, then the write path (collector), then the script that feeds it
 that ties config to both ends, and finally deployment, backups, and onboarding a real
 site.
 
-**Current status:** Phase 1 complete (2026-06-16). Phase 2 next.
+**Current status:** Phase 2 complete (2026-06-16). Phase 3 next.
 
 **Stack:** TypeScript, Hono, `better-sqlite3` (synchronous, WAL), Vite + React SPA,
 Recharts or uPlot for charts, Railway (container + persistent volume), Cloudflare R2
@@ -110,7 +110,8 @@ Before Phase 2, these must be true:
 
 ---
 
-## Phase 2: The Tracker (`wisp.js`)
+## Phase 2: The Tracker (`wisp.js`) ✅
+**Status:** Complete (2026-06-16)
 
 **Goal:** A dependency-free ~1KB tracking script, served by Wisp, that sends pageviews
 (including SPA route changes), supports a custom-event API, and reads per-site config to
@@ -127,14 +128,14 @@ decide what to auto-track.
 - Collects only path, referrer, screen size, site key — nothing identifying
 
 ### Tasks
-- [ ] Write the tracker: read `data-site` from the script tag, send a pageview on load
-- [ ] Hook `history.pushState`/`replaceState` + `popstate` to fire pageviews on SPA route changes
-- [ ] Transport: `sendBeacon` with `keepalive` fetch fallback; non-blocking, unload-safe
-- [ ] Expose `window.wisp(...)`; queue calls made before load, then flush
-- [ ] Auto-track scaffolding reading inline/`data-` config: outbound link clicks, scroll depth (gated by config)
-- [ ] Add a minifier (esbuild/terser) build step; assert output stays ~1KB
-- [ ] Serve `wisp.js` from Hono with appropriate cache headers
-- [ ] Manual smoke page that loads the script and exercises pageview + custom event
+- [x] Write the tracker: read `data-site` from the script tag, send a pageview on load (completed 2026-06-16)
+- [x] Hook `history.pushState`/`replaceState` + `popstate` to fire pageviews on SPA route changes (completed 2026-06-16)
+- [x] Transport: `sendBeacon` with `keepalive` fetch fallback; non-blocking, unload-safe (completed 2026-06-16)
+- [x] Expose `window.wisp(...)`; queue calls made before load, then flush (completed 2026-06-16)
+- [x] Auto-track scaffolding reading inline/`data-` config: outbound link clicks, scroll depth (gated by config) (completed 2026-06-16)
+- [x] Add a minifier (esbuild/terser) build step; assert output stays ~1KB (completed 2026-06-16)
+- [x] Serve `wisp.js` from Hono with appropriate cache headers (completed 2026-06-16)
+- [x] Manual smoke page that loads the script and exercises pageview + custom event (completed 2026-06-16)
 
 ### Testing Strategy
 - Loading the test page sends a pageview that lands in `events`
@@ -148,9 +149,9 @@ decide what to auto-track.
 
 ### Phase 2 Readiness Gate
 Before Phase 3, these must be true:
-- [ ] Tracker reliably feeds real events into the collector end-to-end
-- [ ] Minified size target (~1KB) met
-- [ ] Custom-event API and SPA tracking verified
+- [x] Tracker reliably feeds real events into the collector end-to-end
+- [x] Minified size target (~1KB) met
+- [x] Custom-event API and SPA tracking verified
 
 ---
 
