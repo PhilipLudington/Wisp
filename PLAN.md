@@ -295,7 +295,7 @@ snippet.
 - [x] Production container/build for the single Hono process (API + `wisp.js` + SPA) — multi-stage `Dockerfile` (build with full deps → `npm prune --omit=dev` → slim runtime running `tsx`), `.dockerignore`, `railway.json` (Dockerfile builder, `/health` check); config honors Railway's `PORT`; verified `npm start` serves API + tracker + SPA with migrations on boot (completed 2026-06-16)
 - [ ] Provision Railway service + persistent volume; mount the DB path; set env vars (password, paths, R2 creds)
 - [ ] Verify migrations run on deploy and salt survives redeploys on the real volume
-- [ ] Backup job: nightly `VACUUM INTO` → upload to Cloudflare R2; document the restore (download + file swap)
+- [x] Backup job: nightly `VACUUM INTO` → upload to Cloudflare R2; document the restore (download + file swap) — `scripts/backup.ts` (snapshot → optional local copy + R2), dependency-free SigV4 uploader (`scripts/r2.ts`), `npm run backup`, env config in `config.ts`, full ops/restore guide in [BACKUP.md](./BACKUP.md); local snapshot path verified (integrity ok, no WAL sidecar) — live R2 upload pending the user's R2 credentials (completed 2026-06-16)
 - [ ] Register the first real site (`key`, `name`, `domains`, `config`)
 - [ ] Replace that site's GA/Plausible `<script>` with `<script defer data-site="..." src=".../wisp.js">`
 - [ ] Confirm real traffic flows: pageviews, uniques, and the dashboard reflect live data
