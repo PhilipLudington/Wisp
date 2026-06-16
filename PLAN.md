@@ -292,7 +292,7 @@ snippet.
 - First real site registered and its GA/Plausible snippet replaced with the Wisp tag
 
 ### Tasks
-- [ ] Production container/build for the single Hono process (API + `wisp.js` + SPA)
+- [x] Production container/build for the single Hono process (API + `wisp.js` + SPA) — multi-stage `Dockerfile` (build with full deps → `npm prune --omit=dev` → slim runtime running `tsx`), `.dockerignore`, `railway.json` (Dockerfile builder, `/health` check); config honors Railway's `PORT`; verified `npm start` serves API + tracker + SPA with migrations on boot (completed 2026-06-16)
 - [ ] Provision Railway service + persistent volume; mount the DB path; set env vars (password, paths, R2 creds)
 - [ ] Verify migrations run on deploy and salt survives redeploys on the real volume
 - [ ] Backup job: nightly `VACUUM INTO` → upload to Cloudflare R2; document the restore (download + file swap)

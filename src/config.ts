@@ -37,7 +37,9 @@ export interface Config {
 }
 
 export const config: Config = {
-  port: envInt('WISP_PORT', 3000),
+  // Railway (and most PaaS) inject the listen port as `PORT`; honor it when
+  // `WISP_PORT` isn't set explicitly so the container needs no extra config.
+  port: envInt('WISP_PORT', envInt('PORT', 3000)),
   dbPath: resolve(envStr('WISP_DB_PATH', './data/wisp.db')),
   adminPassword: envStr('WISP_ADMIN_PASSWORD', ''),
   saltRotationTz: envStr('WISP_SALT_ROTATION_TZ', 'UTC'),

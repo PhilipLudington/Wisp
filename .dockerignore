@@ -1,0 +1,13 @@
+# Keep the build context lean and avoid copying host-built artifacts into the
+# image (they'd shadow the clean ones built inside the builder stage).
+node_modules
+dist
+data
+*.db
+*.db-shm
+*.db-wal
+.git
+.env
+.env.local
+*.log
+.DS_Store
