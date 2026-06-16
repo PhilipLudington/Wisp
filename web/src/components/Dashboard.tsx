@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api.js';
 import { usePoll, useResource } from '../hooks.js';
-import type { Range, SiteSummary } from '../types.js';
+import type { Goal, Range, SiteSummary } from '../types.js';
 import { BarChart, LineChart } from './Charts.js';
-import { Async, Panel, TopList } from './Panels.js';
+import { Async, GoalPanel, Panel, TopList } from './Panels.js';
 import { RangePicker } from './RangePicker.js';
 
 /**
@@ -30,6 +30,10 @@ export function Dashboard({
     }
   }, [sites.data, site]);
 
+  // Goals come from the selected site's config — purely config-driven, no
+  // per-site code: each goal becomes a panel below.
+  const goals = sites.data?.find((s) => s.key === site)?.config.goals ?? [];
+
   return (
     <div className="dash">
       <Header
@@ -42,7 +46,7 @@ export function Dashboard({
         onUnauthed={onUnauthed}
       />
       {site ? (
-        <Panels site={site} range={range} onUnauthed={onUnauthed} />
+        <Panels site={site} range={range} goals={goals} onUnauthed={onUnauthed} />
       ) : (
         <div className="dash-empty">
           {sites.loading ? 'Loading sites…' : 'No sites registered. Seed one to begin.'}
@@ -119,10 +123,12 @@ function CurrentVisitors({
 function Panels({
   site,
   range,
+  goals,
   onUnauthed,
 }: {
   site: string;
   range: Range;
+  goals: Goal[];
   onUnauthed: () => void;
 }): React.JSX.Element {
   // A stable key for the resource deps: site + serialized range.
@@ -192,6 +198,18 @@ function Panels({
           {(rows) => <TopList rows={rows} emptyLabel="No custom events tracked." />}
         </Async>
       </Panel>
+
+      {/* One panel per configured goal — appears purely from `sites.config`,
+          no code change. Counts reuse the custom-events data already fetched. */}
+      {goals.map((g) => (
+        <Panel
+          key={`${g.name}:${g.event}`}
+          title={g.name}
+          aside={<span className="panel-note">goal</span>}
+        >
+          <Async res={events}>{(rows) => <GoalPanel goal={g} rows={rows} />}</Async>
+        </Panel>
+      ))}
     </main>
   );
 }

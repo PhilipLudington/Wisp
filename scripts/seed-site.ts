@@ -1,5 +1,6 @@
 import { getDb } from '../src/db/connection.js';
 import { runMigrations } from '../src/db/migrate.js';
+import { validateSiteConfig } from '../src/sites/config.js';
 
 /**
  * Register (or update) a site for local testing.
@@ -29,8 +30,14 @@ const domains = domainsCsv
   : [`http://localhost:5173`];
 const cfg = configJson ?? '{}';
 
-// Validate the JSON inputs before touching the DB.
-JSON.parse(cfg);
+// Validate config (shape + known fields) before touching the DB. Unknown
+// top-level keys are allowed through for forward-compat; see src/sites/config.ts.
+const configErrors = validateSiteConfig(cfg);
+if (configErrors.length > 0) {
+  console.error('Invalid config:');
+  for (const e of configErrors) console.error('  - ' + e);
+  process.exit(1);
+}
 
 const db = getDb();
 runMigrations(db);

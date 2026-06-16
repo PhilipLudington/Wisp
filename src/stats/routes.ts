@@ -1,5 +1,6 @@
 import type { Context, Hono } from 'hono';
 import type { DB } from '../db/connection.js';
+import { parseSiteConfig } from '../sites/config.js';
 import {
   currentVisitors,
   customEvents,
@@ -34,7 +35,7 @@ export function registerStats(app: Hono, db: DB): void {
   app.get('/api/sites', (c) => {
     const rows = selectSites.all() as SiteRow[];
     return c.json({
-      sites: rows.map((r) => ({ key: r.key, name: r.name, config: parseConfig(r.config) })),
+      sites: rows.map((r) => ({ key: r.key, name: r.name, config: parseSiteConfig(r.config) })),
     });
   });
 
@@ -99,13 +100,4 @@ export function registerStats(app: Hono, db: DB): void {
     if (!site) return c.json({ error: 'unknown site' }, 404);
     return c.json({ current: currentVisitors(db, site.key) });
   });
-}
-
-function parseConfig(raw: string): Record<string, unknown> {
-  try {
-    const v = JSON.parse(raw) as unknown;
-    return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
-  } catch {
-    return {};
-  }
 }

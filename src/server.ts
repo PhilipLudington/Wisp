@@ -3,6 +3,7 @@ import { registerAuth, requireAuth } from './auth/routes.js';
 import { config } from './config.js';
 import type { DB } from './db/connection.js';
 import { handleIngest } from './ingest/route.js';
+import { handleSiteConfig } from './sites/configRoute.js';
 import { registerStats } from './stats/routes.js';
 import { handleTracker } from './tracker/serve.js';
 import { registerDashboard } from './web/serve.js';
@@ -25,6 +26,9 @@ export function createApp(db: DB, opts: AppOptions = {}): Hono {
 
   // The tracker script every site embeds.
   app.get('/wisp.js', handleTracker());
+
+  // Public per-site config the tracker reads to decide what to auto-track.
+  app.get('/c/:site', handleSiteConfig(db));
 
   // The only write path: tracker events.
   app.post('/e', handleIngest(db));

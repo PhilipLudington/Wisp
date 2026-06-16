@@ -10,9 +10,11 @@
  *     fire-and-forget so they never block navigation and survive page unload.
  *   - Expose window.wisp('event', name, props?) for custom events, flushing any
  *     calls queued before the script loaded.
- *   - Optionally auto-track outbound link clicks and scroll depth, gated by the
- *     `data-auto` attribute (a comma-separated list). This is the inline config
- *     hook that per-site config will later drive (Phase 5).
+ *   - Optionally auto-track outbound link clicks and scroll depth. Which
+ *     behaviors run is driven by the site's server-side config, fetched from
+ *     `/c/<site>` (so a central config change reaches every embed without
+ *     editing the snippet). A `data-auto="outboundLinks,scrollDepth"` attribute
+ *     overrides that fetch for one-off/inline control.
  *   - Collect nothing identifying: path, referrer, screen width, site key only.
  *
  * Written as a hand-minifiable IIFE; the build step (scripts/build-tracker.ts)
@@ -32,15 +34,10 @@
   var site = self.getAttribute('data-site');
   if (!site) return;
 
-  // Endpoint: explicit data-host wins, else derive the origin from the script src.
-  var host = self.getAttribute('data-host') || new URL(self.src).origin;
-  var endpoint = host.replace(/\/$/, '') + '/e';
-
-  // Auto-track flags, e.g. data-auto="outboundLinks,scrollDepth".
-  var auto = (self.getAttribute('data-auto') || '').split(',');
-  function enabled(flag) {
-    return auto.indexOf(flag) > -1;
-  }
+  // Endpoint base: explicit data-host wins, else derive the origin from the
+  // script src. /e takes events; /c/<site> serves this site's auto-track config.
+  var base = (self.getAttribute('data-host') || new URL(self.src).origin).replace(/\/$/, '');
+  var endpoint = base + '/e';
 
   // Fire-and-forget transport: sendBeacon when available, else keepalive fetch.
   // A plain-string body keeps the request CORS-"simple" (text/plain), so no
@@ -92,33 +89,49 @@
     }
   }
 
-  // Auto-track: outbound link clicks.
-  if (enabled('outboundLinks')) {
-    document.addEventListener('click', function (e) {
-      var node = e.target;
-      while (node && node.tagName !== 'A') node = node.parentNode;
-      if (node && node.host && node.host !== location.host) {
-        send('event', 'outbound', { url: node.href });
-      }
-    });
+  // Wire the auto-track behaviors named in `flags` (a list of flag strings).
+  function setupAuto(flags) {
+    // Outbound link clicks.
+    if (flags.indexOf('outboundLinks') > -1) {
+      document.addEventListener('click', function (e) {
+        var node = e.target;
+        while (node && node.tagName !== 'A') node = node.parentNode;
+        if (node && node.host && node.host !== location.host) {
+          send('event', 'outbound', { url: node.href });
+        }
+      });
+    }
+    // Scroll depth — fire once when the user passes 90% of the page.
+    if (flags.indexOf('scrollDepth') > -1) {
+      var fired = false;
+      window.addEventListener(
+        'scroll',
+        function () {
+          if (fired) return;
+          var doc = document.documentElement;
+          if ((window.scrollY + window.innerHeight) / doc.scrollHeight >= 0.9) {
+            fired = true;
+            send('event', 'scroll', { depth: 90 });
+          }
+        },
+        { passive: true },
+      );
+    }
   }
 
-  // Auto-track: scroll depth — fire once when the user passes 90% of the page.
-  if (enabled('scrollDepth')) {
-    var fired = false;
-    window.addEventListener(
-      'scroll',
-      function () {
-        if (fired) return;
-        var doc = document.documentElement;
-        var reached = (window.scrollY + window.innerHeight) / doc.scrollHeight;
-        if (reached >= 0.9) {
-          fired = true;
-          send('event', 'scroll', { depth: 90 });
-        }
-      },
-      { passive: true },
-    );
+  // Inline data-auto overrides the server; otherwise fetch this site's config.
+  var inline = self.getAttribute('data-auto');
+  if (inline) {
+    setupAuto(inline.split(','));
+  } else {
+    fetch(base + '/c/' + site)
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (cfg) {
+        setupAuto(cfg.autoTrack || []);
+      })
+      .catch(function () {});
   }
 
   // Initial pageview.

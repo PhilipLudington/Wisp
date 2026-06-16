@@ -13,7 +13,7 @@ storage first, then the write path (collector), then the script that feeds it
 that ties config to both ends, and finally deployment, backups, and onboarding a real
 site.
 
-**Current status:** Phase 4 complete (2026-06-16). Phase 5 next.
+**Current status:** Phase 5 complete (2026-06-16). Phase 6 next.
 
 **Stack:** TypeScript, Hono, `better-sqlite3` (synchronous, WAL), Vite + React SPA,
 Recharts or uPlot for charts, Railway (container + persistent volume), Cloudflare R2
@@ -241,7 +241,8 @@ Before Phase 5, these must be true:
 
 ---
 
-## Phase 5: Per-Site Config (Adaptability Layer)
+## Phase 5: Per-Site Config (Adaptability Layer) ✅
+**Status:** Complete (2026-06-16)
 
 **Goal:** Make `sites.config` actually drive behavior on both ends — `autoTrack` flags
 reach the tracker, and a flat `goals` list makes dashboard panels appear — proving the
@@ -256,11 +257,11 @@ config-drives-both mechanism exists from day one.
 - A documented config shape with room to grow (funnels, path goals deferred)
 
 ### Tasks
-- [ ] Expose a site's config to the tracker (inline on `wisp.js` request or a tiny config endpoint), honoring `autoTrack`
-- [ ] Wire tracker auto-track behaviors to the config flags
-- [ ] Dashboard reads `sites.config.goals` and renders one panel per goal (count of the named event)
-- [ ] Validate config on write/seed; sensible defaults for empty config (`{}`)
-- [ ] Document the v1 config schema and the deferred fields
+- [x] Expose a site's config to the tracker via a tiny public config endpoint (`GET /c/:site` returning `{autoTrack}`); tracker fetches it, `data-auto` attribute overrides (completed 2026-06-16)
+- [x] Wire tracker auto-track behaviors to the config flags (`setupAuto` driven by fetched/inline flags) (completed 2026-06-16)
+- [x] Dashboard reads `sites.config.goals` and renders one panel per goal (count derived from the already-fetched custom-events data — no new endpoint) (completed 2026-06-16)
+- [x] Validate config on write/seed (`validateSiteConfig`); lenient parse with safe defaults for empty/`{}` config on read paths (completed 2026-06-16)
+- [x] Document the v1 config schema and the deferred fields ([CONFIG.md](./CONFIG.md)) (completed 2026-06-16)
 
 ### Testing Strategy
 - Enabling `outboundLinks`/`scrollDepth` in config makes the tracker emit those events; disabling stops them
@@ -271,8 +272,8 @@ config-drives-both mechanism exists from day one.
 
 ### Phase 5 Readiness Gate
 Before Phase 6, these must be true:
-- [ ] Config changes visibly alter both tracker behavior and dashboard panels
-- [ ] No per-site code branches — purely config-driven
+- [x] Config changes visibly alter both tracker behavior and dashboard panels
+- [x] No per-site code branches — purely config-driven
 
 ---
 

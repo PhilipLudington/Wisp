@@ -1,5 +1,5 @@
 import type { Resource } from '../hooks.js';
-import type { LabelCount } from '../types.js';
+import type { Goal, LabelCount } from '../types.js';
 
 /**
  * Shared panel scaffolding.
@@ -39,6 +39,21 @@ export function Async<T>({
   if (res.error) return <p className="panel-error">{res.error}</p>;
   if (res.loading || res.data === undefined) return <div className="panel-skeleton" />;
   return <>{children(res.data)}</>;
+}
+
+/**
+ * A goal's headline count: how many times its custom event fired in the range.
+ * Derived from the custom-events list the dashboard already fetches, so a new
+ * goal needs no new endpoint — just an entry in `sites.config.goals`.
+ */
+export function GoalPanel({ goal, rows }: { goal: Goal; rows: LabelCount[] }): React.JSX.Element {
+  const count = rows.find((r) => r.label === goal.event)?.count ?? 0;
+  return (
+    <div className="goal">
+      <span className="goal-count">{count.toLocaleString()}</span>
+      <span className="goal-event">{goal.event}</span>
+    </div>
+  );
 }
 
 /** A ranked list of label/count rows with a proportional fill bar. */

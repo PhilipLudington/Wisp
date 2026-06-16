@@ -1,9 +1,21 @@
 /** Shapes returned by the Phase 3 stats API, mirrored for the dashboard. */
 
+/** A goal: a label and the custom-event name it counts (see DESIGN §5). */
+export interface Goal {
+  name: string;
+  event: string;
+}
+
+/** Normalized per-site config the API returns (see src/sites/config.ts). */
+export interface SiteConfig {
+  autoTrack: string[];
+  goals: Goal[];
+}
+
 export interface SiteSummary {
   key: string;
   name: string;
-  config: Record<string, unknown>;
+  config: SiteConfig;
 }
 
 export interface DayCount {

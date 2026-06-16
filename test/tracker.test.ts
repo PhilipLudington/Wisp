@@ -25,6 +25,8 @@ interface EnvOpts {
   referrer?: string;
   sendBeacon?: boolean;
   preQueue?: unknown[][];
+  /** autoTrack flags the stubbed /c/<site> config endpoint returns. */
+  config?: { autoTrack: string[] };
 }
 
 type Listener = (...args: unknown[]) => void;
@@ -96,7 +98,12 @@ function run(opts: EnvOpts = {}) {
       replaceState: () => {},
     } as Record<string, unknown>,
     screen: { width: 1280 },
-    fetch: (url: string, init: { body: string }) => {
+    fetch: (url: string, init?: { body: string }) => {
+      // The tracker fetches /c/<site> (no body) to read its auto-track config;
+      // everything else is a keepalive-fetch event send (has a body).
+      if (!init) {
+        return Promise.resolve({ json: () => Promise.resolve(opts.config ?? { autoTrack: [] }) });
+      }
       sends.push({ via: 'fetch', url, body: JSON.parse(init.body) });
       return Promise.resolve();
     },
@@ -209,6 +216,46 @@ test('outbound + scroll auto-track fire only when enabled', () => {
   const events = on.sends.filter((s) => (s.body as { kind: string }).kind === 'event');
   const names = events.map((s) => (s.body as { name: string }).name);
   assert.deepEqual(names, ['outbound', 'scroll']);
+});
+
+test('server config drives auto-track when no data-auto attribute is set', async () => {
+  const t = run({ config: { autoTrack: ['outboundLinks'] } });
+  // Config wiring is async (fetched from /c/<site>); flush the microtask queue.
+  await new Promise((r) => setImmediate(r));
+
+  t.click({ tagName: 'A', host: 'example.com', href: 'https://example.com/', parentNode: null });
+  // scrollDepth was NOT in config, so a scroll past 90% must not fire.
+  t.env.window.scrollY = 600;
+  t.scroll();
+
+  const events = t.sends.filter((s) => (s.body as { kind: string }).kind === 'event');
+  const names = events.map((s) => (s.body as { name: string }).name);
+  assert.deepEqual(names, ['outbound']);
+});
+
+test('GET /c/:site returns the site autoTrack config (public, no auth)', async () => {
+  const { db, cleanup } = makeTestDb();
+  try {
+    seedSite(db, 'blog', ['https://blog.example.com'], '{"autoTrack":["scrollDepth"],"goals":[]}');
+    const app = createApp(db);
+    const res = await app.request('/c/blog');
+    assert.equal(res.status, 200);
+    assert.deepEqual(await res.json(), { autoTrack: ['scrollDepth'] });
+  } finally {
+    cleanup();
+  }
+});
+
+test('GET /c/:site degrades to empty autoTrack for an unknown site', async () => {
+  const { db, cleanup } = makeTestDb();
+  try {
+    const app = createApp(db);
+    const res = await app.request('/c/nope');
+    assert.equal(res.status, 200);
+    assert.deepEqual(await res.json(), { autoTrack: [] });
+  } finally {
+    cleanup();
+  }
 });
 
 test('GET /wisp.js serves the bundle with a JS content-type and cache headers', async () => {
